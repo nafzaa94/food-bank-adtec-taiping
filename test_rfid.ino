@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <MFRC522.h>
-constexpr uint8_t RST_PIN = 9;     // Configurable, see typical pin layout above
-constexpr uint8_t SS_PIN = 10;     // Configurable, see typical pin layout above
+constexpr uint8_t RST_PIN = 6;     // Configurable, see typical pin layout above
+constexpr uint8_t SS_PIN = 53;     // Configurable, see typical pin layout above
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 MFRC522::MIFARE_Key key;
 String tag;
