@@ -7,8 +7,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // rfid
 #include <SPI.h>
 #include <MFRC522.h>
-constexpr uint8_t RST_PIN = 9;     // Configurable, see typical pin layout above
-constexpr uint8_t SS_PIN = 10;     // Configurable, see typical pin layout above
+constexpr uint8_t RST_PIN = 6;     // Configurable, see typical pin layout above
+constexpr uint8_t SS_PIN = 53;     // Configurable, see typical pin layout above
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 MFRC522::MIFARE_Key key;
 String tag;
@@ -21,9 +21,8 @@ int valueirsensor1 = 0;
 int irsensor2 = 4;
 int valueirsensor2 = 0;
 
-//irsensor 3
-int irsensor3 = 5;
-int valueirsensor3 = 0;
+int total = 3;
+int resettotal = 3;
 
 // button 
 int Button = 2;
@@ -38,10 +37,7 @@ int signaldriver4 = 11;
 
 
 int state = 0;
-int state1 = 0;
-int state2 = 0;
 int staterfid = 0;
-int statefunction = 0;
 
 int Var = 0;
 
@@ -55,13 +51,12 @@ void setup() {
   pinMode(Button, INPUT_PULLUP);
   pinMode(irsensor1, INPUT);
   pinMode(irsensor2, INPUT);
-  pinMode(irsensor3, INPUT);
   pinMode(signaldriver1, OUTPUT);
   pinMode(signaldriver2, OUTPUT);
   pinMode(signaldriver3, OUTPUT);
   pinMode(signaldriver4, OUTPUT);
 
-  lcd.setCursor(0, 4);
+  lcd.setCursor(4, 0);
   lcd.print("WELCOME");
 
   digitalWrite(signaldriver1, LOW);
@@ -78,70 +73,50 @@ void loop() {
   valueButton = digitalRead(Button);
   valueirsensor1 = digitalRead(irsensor1);
   valueirsensor2 = digitalRead(irsensor2);
-  valueirsensor3 = digitalRead(irsensor3);
 
-  if (valueirsensor1 == LOW && state1 == 0){
-    state1 = 1;
+  if (valueirsensor2 == LOW && state == 1){
+    digitalWrite(signaldriver1, LOW);
+    digitalWrite(signaldriver2, LOW);
+    state = 0;
     }
 
-  if (valueirsensor2 == LOW && state == 0){
-    state = 1;
+  if (total == 0){
+    digitalWrite(signaldriver1, HIGH);
+    digitalWrite(signaldriver2, LOW);
+    total = resettotal;
     }
-
-  if (state == 1)
-    {
-    digitalWrite(signaldriver3, LOW);
-    digitalWrite(signaldriver4, LOW);
-    }
-
-  if (state1 == 1){
-      digitalWrite(signaldriver1, LOW);
-      digitalWrite(signaldriver2, LOW);
-
-      statefunction = 1;
-      }
 
   if (valueButton == LOW && Var == 0 && staterfid == 1){
-    lcd.setCursor(1, 0);
+    lcd.setCursor(0, 1);
     lcd.print("                ");
     lcd.setCursor(1, 1);
     lcd.print("SILA TGU...");
     Var = 1;
-    state = 0;
-    state1 = 0;
-    state2 = 0;
-    statefunction = 0;
     }
 
   switch (Var) {
   case 1:
-    digitalWrite(signaldriver1, HIGH);
-    digitalWrite(signaldriver2, LOW);
-
-    if (statefunction == 1){
-      Var = 2;
-      }
-    break;
-  case 2:
     digitalWrite(signaldriver3, LOW);
     digitalWrite(signaldriver4, HIGH);
-    Var = 3;
+    
+    Var = 2;
     break;
-  case 3:
-    if (valueirsensor3 == LOW && state2 == 0){
+  case 2:
+    if (valueirsensor1 == LOW){
       digitalWrite(signaldriver3, HIGH);
       digitalWrite(signaldriver4, LOW);
-      state2 = 1;
-      state = 0;
-      }
-
-    if (state == 1){
-      Var = 4;
+      state = 1;
+      delay(5000); // 5sec
+      Var = 3;
       }
     break;
-  case 4:
+  case 3:
     digitalWrite(signaldriver1, LOW);
     digitalWrite(signaldriver2, HIGH);
+    Var = 4;
+    break;
+  case 4:
+    total = total - 1;
     Var = 0;
     staterfid = 0;
     lcd.setCursor(1, 0);
@@ -161,25 +136,25 @@ void Rfid(){
       Serial.println(tag);
     }
 
-  if (tag == ""){
-    lcd.setCursor(1, 0);
+  if (tag == "code card"){
+    lcd.setCursor(0, 1);
     lcd.print("                ");
     lcd.setCursor(1, 1);
     lcd.print("ACCESS>>>>>");
     delay(3000);
-    lcd.setCursor(1, 0);
+    lcd.setCursor(0, 1);
     lcd.print("                ");
     lcd.setCursor(1, 1);
     lcd.print("TEKAN BTN");
     staterfid = 1;
     }
   else {
-    lcd.setCursor(1, 0);
+    lcd.setCursor(0, 1);
     lcd.print("                ");
     lcd.setCursor(1, 1);
     lcd.print("INVALID...");
     delay(3000);
-    lcd.setCursor(1, 0);
+    lcd.setCursor(0, 1);
     lcd.print("                ");
     staterfid = 0;
     }
